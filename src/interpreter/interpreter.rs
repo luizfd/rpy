@@ -110,6 +110,26 @@ pub fn execute(stmt: Statement, env: &Environment<EnvValue>) -> Result<ControlFl
                 Err(String::from("write_to_file expects two string arguments"))
             }
         }
+        Statement::Print(input) => {
+            let value = eval(input, &new_env)?;
+            match value {
+                EnvValue::Exp(Expression::CString(s)) => {println!("{}", s); Ok(ControlFlow::Continue(new_env))},
+                EnvValue::Exp(Expression::CInt(i)) => {println!("{}", i); Ok(ControlFlow::Continue(new_env))},
+                EnvValue::Exp(Expression::CReal(f)) => {println!("{:.16}", f); Ok(ControlFlow::Continue(new_env))},
+                EnvValue::Exp(Expression::CTrue) => {println!("True"); Ok(ControlFlow::Continue(new_env))},
+                EnvValue::Exp(Expression::CFalse) => {println!("False"); Ok(ControlFlow::Continue(new_env))},
+/*                 EnvValue::Exp(Expression::Add(value1,value2)) => {
+                    let temp1=0.0;
+                    let temp2=0.0;
+                    Statement::Assignment(String::from("temp1"), value1, Some(crate::ir::ast::Type::TReal));
+                    Statement::Assignment(String::from("temp2"), value2, Some(crate::ir::ast::Type::TReal));
+                    println!("{}", temp1+temp2);
+                    Ok(ControlFlow::Continue(new_env))
+                }, */
+                _=>Err(String::from("Print function does not support this format"))
+            }
+        }
+
         // Statement::ReadFile(file_path_exp, var_name) => {
         //     let file_path_value = eval(*file_path_exp, &new_env)?;
 
@@ -487,6 +507,19 @@ mod tests {
     use crate::ir::ast::Statement::*;
     use crate::ir::ast::Type::*;
     use approx::relative_eq;
+
+    #[test]
+    fn eval_print() {
+        let env: Environment<EnvValue> = Environment::new();
+
+        let print_input = Expression::Add(Box::new(CInt(50)), Box::new(CInt(15)));
+        let print_stmt=Statement::Print(print_input);
+
+        match execute(print_stmt, &env) {
+            Ok(_) => println!("Print successful"),
+            Err(e) => println!("Execution failed: {}", e),
+        }
+    }
 
     #[test]
     fn eval_constant() {
