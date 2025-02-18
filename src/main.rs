@@ -2,25 +2,35 @@
 //use crate::ir::ast::Statement;
 //use crate::interpreter::interpreter::eval;
 
-use interpreter::interpreter::execute;
+use interpreter::interpreter::{execute, ControlFlow};
 use ir::ast::{Environment, Expression, Statement};
 
 pub mod interpreter;
 pub mod ir;
 pub mod tc;
+
 fn main() -> Result<(), String> {
+
     let exec_env = Environment::new();
 
-    let file_path = Expression::CString("output.txt".to_string());
-    let content = Expression::CString("teste de escrita".to_string());
+    //let value_to_print = Expression::CString("hello, world!".to_string());
 
-    let write_stmt = Statement::WriteToFile(Box::new(file_path), Box::new(content));
+    let value_to_print = Expression::Add(
+        Box::new(Expression::CReal(3.15)),
+        Box::new(Expression::CReal(2.1)),
+    );
 
 
-    match execute(write_stmt, &exec_env) {
-        Ok(_) => println!("File written successfully"),
+
+    let print_stmt = Statement::Print(Box::new(value_to_print));
+
+    match execute(print_stmt, &exec_env) {
+        Ok(ControlFlow::Continue(_)) => println!("Print statement executed successfully"),
+        Ok(ControlFlow::Return(_)) => println!("Unexpected return from print statement"),
         Err(e) => return Err(format!("Execution failed: {}", e)),
+        
     }
+
 
     Ok(())
 }

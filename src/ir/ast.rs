@@ -169,5 +169,6 @@ pub enum Statement {
     FuncDef(Function),
     Return(Box<Expression>),
     WriteToFile(Box<Expression>, Box<Expression>),
+    Print(Box<Expression>),
     //ReadFile(Box<Expression>, Name), 
 }

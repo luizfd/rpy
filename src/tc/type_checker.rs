@@ -186,6 +186,16 @@ pub fn check_stmt(stmt: Statement, env: &Environment<Type>) -> Result<ControlFlo
 
         //     Ok(ControlFlow::Continue(new_env))
         // }
+        Statement::Print(exp) => {
+            // Check that the expression is valid
+            let exp_type = check_exp(*exp, &new_env)?;
+
+            // Ensure the expression is printable (e.g., not a function or complex type)
+            match exp_type {
+                Type::TInteger | Type::TReal | Type::TString | Type::TBool => Ok(ControlFlow::Continue(new_env)),
+                _ => Err(String::from("Cannot print this type of value")),
+            }
+        }
 
 
         _ => Err(String::from("not implemented yet.")),

@@ -123,7 +123,20 @@ pub fn execute(stmt: Statement, env: &Environment<EnvValue>) -> Result<ControlFl
         //         Err(String::from("read_file expects a string as the file path"))
         //     }
         // }
+        Statement::Print(exp) => {
+            let value = eval(*exp, &new_env)?;
 
+            match value {
+                EnvValue::Exp(Expression::CInt(i)) => println!("{}", i),
+                EnvValue::Exp(Expression::CReal(r)) => println!("{}", r),
+                EnvValue::Exp(Expression::CString(s)) => println!("{}", s),
+                EnvValue::Exp(Expression::CTrue) => println!("true"),
+                EnvValue::Exp(Expression::CFalse) => println!("false"),
+                _ => return Err(String::from("Cannot print this type of value")),
+            }
+
+            Ok(ControlFlow::Continue(new_env))
+        }
         _ => Err(String::from("not implemented yet")),
     }
 }

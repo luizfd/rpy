@@ -2,40 +2,25 @@
 //use crate::ir::ast::Statement;
 //use crate::interpreter::interpreter::eval;
 
-use interpreter::interpreter::{execute, ControlFlow, EnvValue};
-use ir::ast::{Environment, Expression, Statement, Type};
+use interpreter::interpreter::execute;
+use ir::ast::{Environment, Expression, Statement};
 
 pub mod interpreter;
 pub mod ir;
 pub mod tc;
 fn main() -> Result<(), String> {
-
     let exec_env = Environment::new();
 
     let file_path = Expression::CString("output.txt".to_string());
+    let content = Expression::CString("teste de escrita".to_string());
 
-    let read_file_exp = Expression::ReadFile(Box::new(file_path));
+    let write_stmt = Statement::WriteToFile(Box::new(file_path), Box::new(content));
 
-    let assign_stmt = Statement::Assignment(
-        "fileContents".to_string(),
-        Box::new(read_file_exp),
-        Some(Type::TString),
-    );
 
-    match execute(assign_stmt, &exec_env) {
-        Ok(ControlFlow::Continue(new_env)) => {
-            if let Some(EnvValue::Exp(Expression::CString(contents))) = new_env.search_frame("fileContents".to_string()) {
-                println!("File contents: {}", contents);
-            } else {
-                return Err(String::from("Failed to retrieve file contents from environment"));
-            }
-        }
-        Ok(ControlFlow::Return(value)) => {
-            println!("Returned value: {:?}", value);
-        }
+    match execute(write_stmt, &exec_env) {
+        Ok(_) => println!("File written successfully"),
         Err(e) => return Err(format!("Execution failed: {}", e)),
     }
 
     Ok(())
-
 }
