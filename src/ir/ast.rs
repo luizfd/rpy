@@ -156,6 +156,10 @@ pub enum Expression {
     LTE(Box<Expression>, Box<Expression>),
 
     ReadFile(Box<Expression>),
+    ReadString,
+    ReadInt,
+    ReadFloat,
+
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -170,5 +174,4 @@ pub enum Statement {
     Return(Box<Expression>),
     WriteToFile(Box<Expression>, Box<Expression>),
     Print(Box<Expression>),
-    //ReadFile(Box<Expression>, Name), 
 }

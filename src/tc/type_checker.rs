@@ -37,7 +37,9 @@ pub fn check_exp(exp: Expression, env: &Environment<Type>) -> Result<Type, Error
 
             Ok(Type::TString)
         }
-
+        Expression::ReadString => Ok(Type::TString),
+        Expression::ReadInt => Ok(Type::TInteger),
+        Expression::ReadFloat => Ok(Type::TReal),
     }
 }
 
@@ -175,22 +177,10 @@ pub fn check_stmt(stmt: Statement, env: &Environment<Type>) -> Result<ControlFlo
 
             Ok(ControlFlow::Continue(new_env))
         }
-        // Statement::ReadFile(file_path_exp, var_name) => {
-        //     let file_path_type = check_exp(*file_path_exp, &new_env)?;
 
-        //     if file_path_type != Type::TString {
-        //         return Err(String::from("read_file expects a string as the file path"));
-        //     }
-
-        //     new_env.insert_variable(var_name, Type::TString);
-
-        //     Ok(ControlFlow::Continue(new_env))
-        // }
         Statement::Print(exp) => {
-            // Check that the expression is valid
             let exp_type = check_exp(*exp, &new_env)?;
 
-            // Ensure the expression is printable (e.g., not a function or complex type)
             match exp_type {
                 Type::TInteger | Type::TReal | Type::TString | Type::TBool => Ok(ControlFlow::Continue(new_env)),
                 _ => Err(String::from("Cannot print this type of value")),

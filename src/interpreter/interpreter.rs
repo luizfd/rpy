@@ -29,6 +29,9 @@ pub fn eval(exp: Expression, env: &Environment<EnvValue>) -> Result<EnvValue, Er
         Expression::LTE(lhs, rhs) => lte(*lhs, *rhs, env),
         Expression::Var(name) => lookup(name, env),
         Expression::FuncCall(name, args) => call(name, args, env),
+
+        //TODO: separar as seguintes expressions em funções pra ficar consistente com as outras
+
         Expression::ReadFile(file_path_exp) => {
             let file_path_value = eval(*file_path_exp, env)?;
             if let EnvValue::Exp(Expression::CString(file_path)) = file_path_value {
@@ -38,6 +41,32 @@ pub fn eval(exp: Expression, env: &Environment<EnvValue>) -> Result<EnvValue, Er
                 Err(String::from("read_file expects a string as the file path"))
             }
         }
+
+        Expression::ReadString => {
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).map_err(|e| e.to_string())?;
+
+            let input = input.trim().to_string();
+            Ok(EnvValue::Exp(Expression::CString(input)))
+        }
+
+        Expression::ReadInt => {
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).map_err(|e| e.to_string())?;
+
+            let input = input.trim().parse::<i32>().map_err(|e| e.to_string())?;
+            Ok(EnvValue::Exp(Expression::CInt(input)))
+        }
+
+        Expression::ReadFloat => {
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).map_err(|e| e.to_string())?;
+
+            let input = input.trim().parse::<f64>().map_err(|e| e.to_string())?;
+            Ok(EnvValue::Exp(Expression::CReal(input)))
+        }
+
+
         _ if is_constant(exp.clone()) => Ok(EnvValue::Exp(exp)),
         _ => Err(String::from("Not implemented yet.")),
     }
@@ -110,19 +139,7 @@ pub fn execute(stmt: Statement, env: &Environment<EnvValue>) -> Result<ControlFl
                 Err(String::from("write_to_file expects two string arguments"))
             }
         }
-        // Statement::ReadFile(file_path_exp, var_name) => {
-        //     let file_path_value = eval(*file_path_exp, &new_env)?;
 
-        //     if let EnvValue::Exp(Expression::CString(file_path)) = file_path_value {
-        //         let content = std::fs::read_to_string(file_path).map_err(|e| e.to_string())?;
-
-        //         new_env.insert_variable(var_name, EnvValue::Exp(Expression::CString(content)));
-
-        //         Ok(ControlFlow::Continue(new_env))
-        //     } else {
-        //         Err(String::from("read_file expects a string as the file path"))
-        //     }
-        // }
         Statement::Print(exp) => {
             let value = eval(*exp, &new_env)?;
 
